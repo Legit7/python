@@ -6,6 +6,7 @@ import sys
 client = False
 server = False
 port = 54545
+name = input("Enter your name: ") + ": "
 try:
     if '.' in sys.argv[1]:
         server_ip = sys.argv[1]
@@ -48,71 +49,83 @@ if server == True:
             while True:
                 for i in conn_list:
                     tmp, addr = i
-                    if len(tmp.recv(1024).decode()) != 0:
-
-                        print(tmp.recv(1024).decode())
-                    else:
-                        continue
+                    print(tmp.recv(1024).decode())
+                    sleep(0.5)
+                    # if len(tmp.recv(1024).decode()) != 0:
+                    #     print("At if recv.. ")
+                    #     print(tmp.recv(1024).decode())
+                    # else:
+                    #     print("At else recv.. ")
+                    #     continue
 
     # Watch out for messages to send from server
     class Send(Thread):
         def run(self):
             while True:
-                data1 = input().encode()
+                data1 = (name + input()).encode()
                 for i in conn_list:
                     tmp1, addr1 = i
                     tmp1.send(data1)
-                    sleep(0.8)
+                    sleep(0.5)
 
     con = Conn()
     recv = Recv()
     send = Send()
 
     con.start()
-    sleep(1)
+    # sleep(1)
     recv.start()
-    sleep(0.2)
+    # sleep(1)
     send.start()
 
     con.join()
+    print("at recv join")
     recv.join()
+    print("at send join")
     send.join()
+
+    print("chk1")
 
     for i in conn_list:
         tmp2, addr = i
         print("\n \nShutting down ", addr,"....")
         tmp2.shutdown()
+        print("chk2")
         tmp2.close()
+        print("chk3")
 
 if client == True:
     c = socket.socket() # default (IPv4, TCP) optional (IPv6, UDP)
-    c.connect((ip, port)) # client will use connect method to make connection with given IP and host
-    print("Connection is ready...")
+    c.connect((server_ip, port)) # client will use connect method to make connection with given IP and host
+    print(f"Connection is ready... \nText out something...")
 
     # Watch out for messages from server
     class Rec(Thread):
         def run(self):
             while True:
-                print("Ser: ", c.recv(1024).decode()) # receives data of 1024 bytes with socket object
-                sleep(1)
+                print(c.recv(1024).decode()) # receives data of 1024 bytes with socket object
+                sleep(0.5)
 
     # Send messages to server
     class Sen(Thread):
         def run(self):
             while True:
-                data = input().encode()
+                data = (name + input()).encode()
                 c.send(data)
-                sleep(1)
+                sleep(0.5)
 
     rec = Rec()
     sen = Sen()
 
     rec.start()
-    sleep(1)
+    # sleep(0.5)
     sen.start()
-
     rec.join()
+    print("at rec join")
     sen.join()
-
+    print("at sen join")
+    print("chk1")
     c.shutdown()
+    print("chk2")
     c.close()
+    print("chk3")
